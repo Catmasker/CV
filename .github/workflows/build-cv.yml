@@ -17,13 +17,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install LaTeX
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-lang-chinese
-
       - name: Compile LaTeX
-        run: pdflatex -interaction=nonstopmode main.tex
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          latexmk_use_xelatex: true
+          extra_system_packages: "fonts-noto-cjk"
 
       - name: Prepare PDF for release branch
         run: |
