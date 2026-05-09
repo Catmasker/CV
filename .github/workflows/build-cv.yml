@@ -17,13 +17,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Compile LaTeX with Docker
+      - name: Install LaTeX
         run: |
-          docker run --rm -v ${{ github.workspace }}:/latex texlive/texlive:latest bash -c "
-            tlmgr update --self && \
-            tlmgr install moderncv ulem xcolor geometry cjk fontawesome5 simpleicons lm helvetic && \
-            pdflatex main.tex
-          "
+          sudo apt-get update
+          sudo apt-get install -y texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-lang-chinese
+
+      - name: Compile LaTeX
+        run: pdflatex -interaction=nonstopmode main.tex
 
       - name: Prepare PDF for release branch
         run: |
