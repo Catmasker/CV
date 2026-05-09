@@ -17,10 +17,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up LaTeX
-        uses: xu-cheng/latex-action@v2
-        with:
-          root_file: main.tex
+      - name: Compile LaTeX with Docker
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/latex texlive/texlive:latest bash -c "
+            tlmgr update --self && \
+            tlmgr install moderncv ulem xcolor geometry cjk fontawesome5 simpleicons lm helvetic && \
+            pdflatex main.tex
+          "
 
       - name: Prepare PDF for release branch
         run: |
@@ -32,7 +35,6 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git checkout --orphan release
-          # Remove all files and folders except .git
           find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
           cp /tmp/cv_release/main.pdf .
           git add main.pdf
@@ -59,4 +61,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./main.pdf
           asset_name: main.pdf
-          asset_content_type: application/pdf 
+          asset_content_type: application/pdf
