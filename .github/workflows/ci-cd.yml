@@ -7,37 +7,41 @@ on:
     branches: [main, master]
 
 jobs:
-  # CI: verify the project structure is correct
-  check-files:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Check required files exist
-        run: |
-          echo "Checking project structure..."
-          test -f main.tex && echo "✅ main.tex found"
-          test -f Dockerfile && echo "✅ Dockerfile found"
-          test -f docker-compose.yml && echo "✅ docker-compose.yml found"
-
-  # CD: create a release when pushing to main
-  release:
-    if: github.event_name == 'push'
-    needs: check-files
+  build-and-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - uses: actions/checkout@v3
-      - name: Create GitHub Release
+
+      - name: Install LaTeX
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq texlive-latex-base texlive-latex-recommended \
+            texlive-latex-extra texlive-fonts-recommended texlive-lang-chinese
+
+      - name: Build CV PDF
+        run: pdflatex -interaction=nonstopmode -halt-on-error main.tex
+
+      - name: Rename PDF to cv.pdf
+        run: cp main.pdf cv.pdf
+
+      - name: Create Release
+        if: github.event_name == 'push'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ github.run_number }}
           name: Release v${{ github.run_number }}
+          files: cv.pdf
           body: |
             ## CV Release v${{ github.run_number }}
 
-            ### How to build
+            ### Attachments
+            - `cv.pdf` — compiled CV document
+
+            ### How to build locally
             - **Docker**: `docker compose run --rm cv-builder`
-            - **Local**: Compile `main.tex` with xelatex or pdflatex
+            - **Local**: Compile `main.tex` with pdflatex
           draft: false
           prerelease: false
