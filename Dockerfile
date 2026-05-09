@@ -4,14 +4,10 @@ FROM texlive/texlive:latest
 RUN tlmgr update --self && \
     tlmgr install \
     moderncv \
-    ulem \
     xcolor \
     geometry \
-    cjk \
     fontawesome5 \
-    simpleicons \
-    lm \
-    helvetic
+    simpleicons
 
 # Install additional utilities
 RUN apt-get update && \
